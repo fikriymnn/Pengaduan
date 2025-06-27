@@ -1,0 +1,38 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+
+    <!-- Background circle -->
+    <path
+        android:fillColor="#E0E0E0"
+        android:pathData="M60,10 A50,50 0 1,1 60,110 A50,50 0 1,1 60,10 Z"/>
+
+    <!-- Document icon -->
+    <path
+        android:fillColor="#BDBDBD"
+        android:pathData="M35,35 L85,35 L85,85 L35,85 Z"/>
+
+    <!-- Document lines -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M42,45 L78,45 L78,47 L42,47 Z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M42,52 L78,52 L78,54 L42,54 Z"/>
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M42,59 L65,59 L65,61 L42,61 Z"/>
+
+    <!-- Search magnifier -->
+    <path
+        android:strokeColor="#9E9E9E"
+        android:strokeWidth="3"
+        android:pathData="M75,37 A8,8 0 1,1 74.9,37 Z" />
+    <path
+        android:strokeColor="#9E9E9E"
+        android:strokeWidth="3"
+        android:pathData="M81,51 L87,57"/>
+
+</vector>

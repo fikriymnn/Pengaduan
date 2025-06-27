@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="20dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <!-- Nama Kategori -->
+    <EditText
+        android:id="@+id/et_kategori_nama"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:hint="Nama Kategori"
+        android:inputType="textCapWords" />
+
+    <!-- Deskripsi -->
+    <EditText
+        android:id="@+id/et_kategori_deskripsi"
+        android:hint="Deskripsi (opsional)"
+        android:inputType="textCapSentences|textMultiLine"
+        android:layout_marginTop="12dp"
+        android:minLines="2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Status Aktif -->
+    <CheckBox
+        android:id="@+id/cb_aktif"
+        android:layout_width="80dp"
+        android:layout_height="58dp"
+        android:layout_marginTop="16dp"
+        android:checked="true"
+        android:text="Aktif" />
+</LinearLayout>

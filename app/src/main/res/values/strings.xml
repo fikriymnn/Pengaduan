@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">My Application</string>
+    <string name="back_button">Kembali</string>
+    <!-- Accessibility content descriptions for icons -->
+    <string name="icon_person">Ikon pelapor</string>
+    <string name="icon_calendar">Ikon tanggal</string>
+    <string name="icon_location">Ikon lokasi</string>
+    <string name="icon_category">Ikon kategori</string>
+    <string name="icon_pending">Ikon status menunggu</string>
+    <string name="icon_refresh">Ikon refresh</string>
+    <string name="icon_visibility">Ikon lihat detail</string>
+    <string name="icon_close">Ikon tolak</string>
+    <string name="icon_check">Ikon konfirmasi</string>
+
+    <!-- Accessibility announcements -->
+    <string name="accessibility_no_reports">Tidak ada pengaduan untuk ditampilkan</string>
+    <string name="accessibility_loading_reports">Memuat daftar pengaduan</string>
+    <string name="accessibility_report_updated">Pengaduan berhasil diperbarui</string>
+
+    <!-- Array untuk jenis pengaduan -->
+    <string-array name="jenis_pengaduan_array">
+        <item>Pengaduan Kejahatan</item>
+        <item>Pengaduan Umum</item>
+    </string-array>
+
+    <string name="title_activity_tambah_tindakan">Tambah Tindakan</string>
+    <string name="title_activity_daftar_tindakan">Daftar Tindakan</string>
+    <string name="hint_nama_petugas">Nama Petugas</string>
+    <string name="hint_deskripsi_tindakan">Deskripsi Tindakan</string>
+    <string name="hint_tanggal_tindakan">Tanggal Tindakan</string>
+    <string name="btn_simpan_tindakan">Simpan Tindakan</string>
+    <string name="btn_kelola_tindakan">Kelola Tindakan</string>
+</resources>
