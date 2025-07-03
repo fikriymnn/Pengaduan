@@ -11,6 +11,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.example.myapplication.models.Admin;
+import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.TaskCompletionSource;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -77,7 +80,7 @@ public class FirebaseHelper {
     public void getConfirmedPengaduanNotActioned(OnCompleteListener<QuerySnapshot> listener) {
         db.collection("pengaduan")
                 .whereEqualTo("status", "confirmed")
-                .whereEqualTo("isActionTaken", false)
+                .whereEqualTo("actionTaken", false)
                 .get()
                 .addOnCompleteListener(listener);
     }
@@ -165,7 +168,7 @@ public class FirebaseHelper {
     // Method untuk menandai pengaduan sudah ditindak
     public void markPengaduanAsActioned(String pengaduanId, OnCompleteListener<Void> listener) {
         Map<String, Object> updates = new HashMap<>();
-        updates.put("isActionTaken", true);
+        updates.put("actionTaken", true);
         updates.put("updatedAt", new Date());
 
         db.collection("pengaduan").document(pengaduanId)
@@ -333,5 +336,85 @@ public class FirebaseHelper {
         return nomorKTP != null && !nomorKTP.trim().isEmpty() && nomorKTP.trim().length() == 16 &&
                 nomorKK != null && !nomorKK.trim().isEmpty() && nomorKK.trim().length() == 16 &&
                 alamat != null && !alamat.trim().isEmpty() && alamat.trim().length() >= 10;
+    }
+
+    // Admin operations
+    public void createAdmin(Admin admin, OnCompleteListener<Void> listener) {
+        String adminId = auth.getCurrentUser().getUid();
+        admin.setId(adminId);
+        db.collection("admins").document(adminId)
+                .set(admin)
+                .addOnCompleteListener(listener);
+    }
+
+    public void getCurrentAdmin(OnCompleteListener<DocumentSnapshot> listener) {
+        String adminId = auth.getCurrentUser().getUid();
+        db.collection("admins").document(adminId)
+                .get()
+                .addOnCompleteListener(listener);
+    }
+
+    public void getAllAdmins(OnCompleteListener<QuerySnapshot> listener) {
+        db.collection("admins")
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnCompleteListener(listener);
+    }
+
+    public void getAdminsByRole(String role, OnCompleteListener<QuerySnapshot> listener) {
+        db.collection("admins")
+                .whereEqualTo("role", role)
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .get()
+                .addOnCompleteListener(listener);
+    }
+
+    public void updateAdminRole(String adminId, String role, OnCompleteListener<Void> listener) {
+        Map<String, Object> updates = new HashMap<>();
+        updates.put("role", role);
+        updates.put("updatedAt", new Date());
+
+        db.collection("admins").document(adminId)
+                .update(updates)
+                .addOnCompleteListener(listener);
+    }
+
+    // Check user type (user or admin)
+    public void checkUserType(OnCompleteListener<Map<String, Object>> listener) {
+        String userId = auth.getCurrentUser().getUid();
+
+        // First check if it's a user
+        db.collection("users").document(userId)
+                .get()
+                .addOnCompleteListener(userTask -> {
+                    if (userTask.isSuccessful() && userTask.getResult().exists()) {
+                        Map<String, Object> result = new HashMap<>();
+                        result.put("type", "user");
+                        result.put("data", userTask.getResult().toObject(User.class));
+
+                        // Create a successful task
+                        TaskCompletionSource<Map<String, Object>> taskSource = new TaskCompletionSource<>();
+                        taskSource.setResult(result);
+                        listener.onComplete(taskSource.getTask());
+                    } else {
+                        // If not a user, check if it's an admin
+                        db.collection("admins").document(userId)
+                                .get()
+                                .addOnCompleteListener(adminTask -> {
+                                    Map<String, Object> result = new HashMap<>();
+                                    if (adminTask.isSuccessful() && adminTask.getResult().exists()) {
+                                        result.put("type", "admin");
+                                        result.put("data", adminTask.getResult().toObject(Admin.class));
+                                    } else {
+                                        result.put("type", "unknown");
+                                        result.put("data", null);
+                                    }
+
+                                    TaskCompletionSource<Map<String, Object>> taskSource = new TaskCompletionSource<>();
+                                    taskSource.setResult(result);
+                                    listener.onComplete(taskSource.getTask());
+                                });
+                    }
+                });
     }
 }

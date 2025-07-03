@@ -46,43 +46,58 @@
 
         <activity
             android:name=".UserDashboardActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".AdminDashboardActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".BuatPengaduanActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".DetailPengaduanActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".KonfirmasiPengaduanActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".DetailKonfirmasiActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".RiwayatPengaduanAdminActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".KategoriManagementActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".RiwayatPengaduanActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".ProfileActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
+
+        <activity
+            android:name=".TambahAdminActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar"/>
 
         <activity
             android:name=".TindakanPengaduanActivity"

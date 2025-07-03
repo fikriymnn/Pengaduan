@@ -11,27 +11,28 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import com.example.myapplication.helpers.FirebaseHelper;
+import com.example.myapplication.models.Admin;
 import com.example.myapplication.models.User;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 public class AdminDashboardActivity extends AppCompatActivity {
 
     private TextView tvWelcome, tvTotalPengaduan, tvPendingPengaduan, tvConfirmedPengaduan, tvRejectedPengaduan;
-    private CardView cardKonfirmasiPengaduan, cardTindakanPengaduan, cardKelolaKategori, cardRiwayatPengaduan, cardManajemenUser;
+    private CardView cardKonfirmasiPengaduan, cardTindakanPengaduan, cardKelolaKategori, cardRiwayatPengaduan, cardTambahAdmin;
     private Button btnLogout;
     private FirebaseHelper firebaseHelper;
-    private User currentUser;
+    private Admin currentAdmin;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_admin_dashboard);
+        setContentView(R.layout.activity_admin_dashboard); // Layout tetap sama
 
         firebaseHelper = FirebaseHelper.getInstance();
 
         initViews();
         setupListeners();
-        loadUserData();
+        loadAdminData();
         loadDashboardStats();
     }
 
@@ -46,80 +47,65 @@ public class AdminDashboardActivity extends AppCompatActivity {
         cardTindakanPengaduan = findViewById(R.id.card_tindakan_pengaduan);
         cardKelolaKategori = findViewById(R.id.card_kelola_kategori);
         cardRiwayatPengaduan = findViewById(R.id.card_riwayat_pengaduan);
-        //cardManajemenUser = findViewById(R.id.card_manajemen_user);
+        cardTambahAdmin = findViewById(R.id.card_tambah_admin);
 
         btnLogout = findViewById(R.id.btn_logout);
     }
 
     private void setupListeners() {
-        cardKonfirmasiPengaduan.setOnClickListener(v -> {
-            startActivity(new Intent(this, KonfirmasiPengaduanActivity.class));
-        });
+        cardKonfirmasiPengaduan.setOnClickListener(v ->
+                startActivity(new Intent(this, KonfirmasiPengaduanActivity.class))
+        );
 
-        cardTindakanPengaduan.setOnClickListener(v -> {
-            startActivity(new Intent(this, TindakanPengaduanActivity.class));
-        });
+        cardTindakanPengaduan.setOnClickListener(v ->
+                startActivity(new Intent(this, TindakanPengaduanActivity.class))
+        );
 
-        cardKelolaKategori.setOnClickListener(v -> {
-            startActivity(new Intent(this, KategoriManagementActivity.class));
-        });
+        cardKelolaKategori.setOnClickListener(v ->
+                startActivity(new Intent(this, KategoriManagementActivity.class))
+        );
 
-        cardRiwayatPengaduan.setOnClickListener(v -> {
-            startActivity(new Intent(this, RiwayatPengaduanAdminActivity.class));
-        });
+        cardRiwayatPengaduan.setOnClickListener(v ->
+                startActivity(new Intent(this, RiwayatPengaduanAdminActivity.class))
+        );
 
-//        cardManajemenUser.setOnClickListener(v -> {
-//            startActivity(new Intent(this, ManajemenUserActivity.class));
-//        });
+        cardTambahAdmin.setOnClickListener(v ->
+                startActivity(new Intent(this, TambahAdminActivity.class))
+        );
 
         btnLogout.setOnClickListener(v -> showLogoutDialog());
     }
 
-    private void loadUserData() {
-        firebaseHelper.getCurrentUser(task -> {
+    private void loadAdminData() {
+        firebaseHelper.getCurrentAdmin(task -> {
             if (task.isSuccessful() && task.getResult().exists()) {
-                currentUser = task.getResult().toObject(User.class);
-                tvWelcome.setText("Selamat datang, " + currentUser.getName());
+                currentAdmin = task.getResult().toObject(Admin.class);
+                tvWelcome.setText("Selamat datang, " + currentAdmin.getName());
             } else {
-                Toast.makeText(this, "Error loading user data", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Error loading admin data", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     private void loadDashboardStats() {
-        // Load total pengaduan
         firebaseHelper.getDb().collection("pengaduan")
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        int totalPengaduan = task.getResult().size();
-                        int pendingCount = 0;
-                        int confirmedCount = 0;
-                        int rejectedCount = 0;
-
-                        for (QueryDocumentSnapshot document : task.getResult()) {
-                            String status = document.getString("status");
-                            if (status != null) {
-                                switch (status) {
-                                    case "pending":
-                                        pendingCount++;
-                                        break;
-                                    case "confirmed":
-                                        confirmedCount++;
-                                        break;
-                                    case "rejected":
-                                        rejectedCount++;
-                                        break;
-                                }
-                            }
+                        int total = 0, pending = 0, confirmed = 0, rejected = 0;
+                        for (QueryDocumentSnapshot doc : task.getResult()) {
+                            total++;
+                            String status = doc.getString("status");
+                            if ("pending".equals(status)) pending++;
+                            else if ("confirmed".equals(status)) confirmed++;
+                            else if ("rejected".equals(status)) rejected++;
                         }
-
-                        tvTotalPengaduan.setText(String.valueOf(totalPengaduan));
-                        tvPendingPengaduan.setText(String.valueOf(pendingCount));
-                        tvConfirmedPengaduan.setText(String.valueOf(confirmedCount));
-                        tvRejectedPengaduan.setText(String.valueOf(rejectedCount));
+                        tvTotalPengaduan.setText(String.valueOf(total));
+                        tvPendingPengaduan.setText(String.valueOf(pending));
+                        tvConfirmedPengaduan.setText(String.valueOf(confirmed));
+                        tvRejectedPengaduan.setText(String.valueOf(rejected));
                     } else {
-                        Toast.makeText(this, "Error loading statistics", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Error loading stats", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -140,7 +126,6 @@ public class AdminDashboardActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh statistics when returning to dashboard
         loadDashboardStats();
     }
 }

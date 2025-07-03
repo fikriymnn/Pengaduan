@@ -11,9 +11,12 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.myapplication.helpers.FirebaseHelper;
+import com.example.myapplication.models.Admin;
 import com.example.myapplication.models.User;
 import com.google.firebase.auth.FirebaseAuthException;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.Map;
 
 public class LoginActivity extends AppCompatActivity {
     private static final String TAG = "LoginActivity";
@@ -194,34 +197,34 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void checkUserRoleAndRedirect() {
-        Log.d(TAG, "Checking user role...");
+        Log.d(TAG, "Checking user type...");
 
-        firebaseHelper.getCurrentUser(task -> {
-            if (task.isSuccessful() && task.getResult().exists()) {
-                User user = task.getResult().toObject(User.class);
-                if (user != null) {
-                    Log.d(TAG, "User role: " + user.getRole());
+        firebaseHelper.checkUserType(task -> {
+            if (task.isSuccessful() && task.getResult() != null) {
+                Map<String, Object> result = task.getResult();
+                String type = (String) result.get("type");
+
+                if ("user".equals(type)) {
+                    startActivity(new Intent(this, UserDashboardActivity.class));
+                } else if ("admin".equals(type)) {
+                    Admin admin = (Admin) result.get("data");
 
                     Intent intent;
-                    if ("admin".equals(user.getRole())) {
+                    if ("admin-kejahatan".equals(admin.getRole())) {
                         intent = new Intent(this, AdminDashboardActivity.class);
                     } else {
-                        intent = new Intent(this, UserDashboardActivity.class);
+                        intent = new Intent(this, AdminDashboardActivity.class);
                     }
 
                     startActivity(intent);
-                    finish();
                 } else {
-                    Log.e(TAG, "User object is null");
-                    Toast.makeText(this, "Error: Data user tidak valid", Toast.LENGTH_SHORT).show();
-                    // Logout user jika data tidak valid
+                    Toast.makeText(this, "Akun tidak dikenali", Toast.LENGTH_SHORT).show();
                     firebaseHelper.getAuth().signOut();
                 }
+
+                finish();
             } else {
-                Log.e(TAG, "Error getting user data: " +
-                        (task.getException() != null ? task.getException().getMessage() : "Unknown error"));
-                Toast.makeText(this, "Error mengambil data user", Toast.LENGTH_SHORT).show();
-                // Logout user jika tidak bisa mengambil data
+                Toast.makeText(this, "Gagal mengambil data user", Toast.LENGTH_SHORT).show();
                 firebaseHelper.getAuth().signOut();
             }
         });
