@@ -15,6 +15,7 @@ import com.example.myapplication.adapters.TindakanPengaduanAdapter;
 import com.example.myapplication.fragments.TindakanDialogFragment;
 import com.example.myapplication.helpers.FirebaseHelper;
 import com.example.myapplication.models.Pengaduan;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -75,26 +76,48 @@ public class TindakanPengaduanActivity extends AppCompatActivity {
     private void loadConfirmedPengaduan() {
         swipeRefreshLayout.setRefreshing(true);
 
-        firebaseHelper.getConfirmedPengaduanNotActioned(task -> {
-            swipeRefreshLayout.setRefreshing(false);
+        firebaseHelper.getCurrentAdmin(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                String role = task.getResult().getString("role");
 
-            if (task.isSuccessful()) {
-                pengaduanList.clear();
+                Query query = firebaseHelper.getDb().collection("pengaduan")
+                        .whereEqualTo("status", "confirmed")
+                        .whereEqualTo("actionTaken", false); // Belum ditindak
 
-                for (QueryDocumentSnapshot document : task.getResult()) {
-                    Pengaduan pengaduan = document.toObject(Pengaduan.class);
-                    pengaduan.setId(document.getId());
-                    pengaduanList.add(pengaduan);
+                if ("admin-umum".equals(role)) {
+                    query = query.whereEqualTo("jenisPengaduan", "umum");
+                } else if ("admin-kejahatan".equals(role)) {
+                    query = query.whereEqualTo("jenisPengaduan", "kejahatan");
                 }
 
-                adapter.notifyDataSetChanged();
-                updateEmptyState();
+                query.get().addOnCompleteListener(pengaduanTask -> {
+                    swipeRefreshLayout.setRefreshing(false);
+
+                    if (pengaduanTask.isSuccessful()) {
+                        pengaduanList.clear();
+
+                        for (QueryDocumentSnapshot document : pengaduanTask.getResult()) {
+                            Pengaduan pengaduan = document.toObject(Pengaduan.class);
+                            pengaduan.setId(document.getId());
+                            pengaduanList.add(pengaduan);
+                        }
+
+                        adapter.notifyDataSetChanged();
+                        updateEmptyState();
+
+                    } else {
+                        Toast.makeText(this, "Gagal memuat data: " + pengaduanTask.getException().getMessage(),
+                                Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             } else {
-                Toast.makeText(this, "Error loading data: " + task.getException().getMessage(),
-                        Toast.LENGTH_SHORT).show();
+                swipeRefreshLayout.setRefreshing(false);
+                Toast.makeText(this, "Gagal mengambil data admin", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
     private void updateEmptyState() {
         if (pengaduanList.isEmpty()) {

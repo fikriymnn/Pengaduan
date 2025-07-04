@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.myapplication.adapters.PengaduanAdapter;
 import com.example.myapplication.helpers.FirebaseHelper;
 import com.example.myapplication.models.Pengaduan;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
 import java.util.ArrayList;
@@ -50,21 +51,43 @@ public class KonfirmasiPengaduanActivity extends AppCompatActivity {
 
     private void loadPendingPengaduan() {
         progressBar.setVisibility(View.VISIBLE);
-        firebaseHelper.getPendingPengaduan(task -> {
-            progressBar.setVisibility(View.GONE);
-            if (task.isSuccessful()) {
-                pengaduanList.clear();
-                for (QueryDocumentSnapshot doc : task.getResult()) {
-                    Pengaduan p = doc.toObject(Pengaduan.class);
-                    p.setId(doc.getId());
-                    pengaduanList.add(p);
+
+        firebaseHelper.getCurrentAdmin(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                String role = task.getResult().getString("role");
+
+                Query query = firebaseHelper.getDb().collection("pengaduan")
+                        .whereEqualTo("status", "pending");
+
+                if ("admin-umum".equals(role)) {
+                    query = query.whereEqualTo("jenisPengaduan", "umum");
+                } else if ("admin-kejahatan".equals(role)) {
+                    query = query.whereEqualTo("jenisPengaduan", "kejahatan");
                 }
-                adapter.notifyDataSetChanged();
+
+                query.get().addOnCompleteListener(pengaduanTask -> {
+                    progressBar.setVisibility(View.GONE);
+
+                    if (pengaduanTask.isSuccessful()) {
+                        pengaduanList.clear();
+                        for (QueryDocumentSnapshot doc : pengaduanTask.getResult()) {
+                            Pengaduan p = doc.toObject(Pengaduan.class);
+                            p.setId(doc.getId());
+                            pengaduanList.add(p);
+                        }
+                        adapter.notifyDataSetChanged();
+                    } else {
+                        Toast.makeText(this, "Gagal memuat data: " + pengaduanTask.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+
             } else {
-                Toast.makeText(this, "Gagal memuat data", Toast.LENGTH_SHORT).show();
+                progressBar.setVisibility(View.GONE);
+                Toast.makeText(this, "Gagal mengambil data admin", Toast.LENGTH_SHORT).show();
             }
         });
     }
+
 
     @Override
     protected void onResume() {

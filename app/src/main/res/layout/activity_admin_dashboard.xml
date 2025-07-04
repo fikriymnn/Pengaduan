@@ -356,7 +356,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Kategori"
+                        android:text="Kategori Umum"
                         android:textSize="14sp"
                         android:textStyle="bold"
                         android:textColor="@color/accent_color"

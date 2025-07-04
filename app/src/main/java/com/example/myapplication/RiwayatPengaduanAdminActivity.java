@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.myapplication.adapters.RiwayatPengaduanAdapter;
 import com.example.myapplication.helpers.FirebaseHelper;
+import com.example.myapplication.models.Admin;
 import com.example.myapplication.models.Pengaduan;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -27,7 +28,7 @@ import java.util.List;
 public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
 
     private ImageView btnBack;
-    private TextView tvTitle, tvEmptyState;
+    private TextView tvTitle, tvEmptyState, tvLabelKategori;
     private Spinner spinnerStatus, spinnerKategori, spinnerTindakan;
     private RecyclerView rvRiwayat;
     private ProgressBar progressBar;
@@ -41,6 +42,7 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
     private String selectedStatus = "Semua";
     private String selectedKategori = "Semua";
     private String selectedTindakan = "Semua";
+    private String currentRole = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +58,6 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
         setupRecyclerView();
         setupSpinners();
         setupListeners();
-        loadKategori();
         loadRiwayatPengaduan();
     }
 
@@ -67,6 +68,7 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
         spinnerStatus = findViewById(R.id.spinner_status);
         spinnerKategori = findViewById(R.id.spinner_kategori);
         spinnerTindakan = findViewById(R.id.spinner_tindakan);
+        tvLabelKategori = findViewById(R.id.tv_label_kategori); // pastikan ini ada di layout XML
         rvRiwayat = findViewById(R.id.rv_riwayat);
         progressBar = findViewById(R.id.progress_bar);
 
@@ -75,7 +77,6 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
 
     private void setupRecyclerView() {
         adapter = new RiwayatPengaduanAdapter(filteredList, pengaduan -> {
-            // Handle item click - show detail
             Intent intent = new Intent(this, DetailPengaduanActivity.class);
             intent.putExtra("pengaduan_id", pengaduan.getId());
             intent.putExtra("from_admin", true);
@@ -87,7 +88,7 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
     }
 
     private void setupSpinners() {
-        // Setup Status Spinner
+        // Status Spinner
         List<String> statusList = new ArrayList<>();
         statusList.add("Semua");
         statusList.add("Pending");
@@ -99,18 +100,20 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
         statusAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerStatus.setAdapter(statusAdapter);
 
-        // Setup Kategori Spinner (will be populated after loading from Firebase)
+        // Kategori Spinner (akan disembunyikan jika admin-kejahatan)
         kategoriList.add("Semua");
         ArrayAdapter<String> kategoriAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, kategoriList);
         kategoriAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerKategori.setAdapter(kategoriAdapter);
 
+        // Tindakan Spinner
         List<String> tindakanList = new ArrayList<>();
         tindakanList.add("Semua");
         tindakanList.add("Sudah Ditindak");
         tindakanList.add("Belum Ditindak");
-        ArrayAdapter<String> tindakanAdapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, tindakanList);
+        ArrayAdapter<String> tindakanAdapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, tindakanList);
         tindakanAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerTindakan.setAdapter(tindakanAdapter);
     }
@@ -119,40 +122,36 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
         btnBack.setOnClickListener(v -> finish());
 
         spinnerStatus.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedStatus = parent.getItemAtPosition(position).toString();
                 filterPengaduan();
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         spinnerKategori.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedKategori = parent.getItemAtPosition(position).toString();
                 filterPengaduan();
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         spinnerTindakan.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+            @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedTindakan = parent.getItemAtPosition(position).toString();
                 filterPengaduan();
             }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
     }
 
     private void loadKategori() {
+        if ("admin-kejahatan".equals(currentRole)) {
+            // Tidak perlu load kategori
+            return;
+        }
+
         firebaseHelper.getDb().collection("kategori")
                 .get()
                 .addOnCompleteListener(task -> {
@@ -167,7 +166,6 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
                             }
                         }
 
-                        // Update spinner adapter
                         ArrayAdapter<String> adapter = (ArrayAdapter<String>) spinnerKategori.getAdapter();
                         adapter.notifyDataSetChanged();
                     }
@@ -177,28 +175,52 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
     private void loadRiwayatPengaduan() {
         showLoading(true);
 
-        firebaseHelper.getDb().collection("pengaduan")
-                .orderBy("createdAt", Query.Direction.DESCENDING)
-                .get()
-                .addOnCompleteListener(task -> {
+        firebaseHelper.getCurrentAdmin(task -> {
+            if (task.isSuccessful() && task.getResult().exists()) {
+                Admin admin = task.getResult().toObject(Admin.class);
+                currentRole = admin.getRole();
+
+                // Sembunyikan kategori jika admin-kejahatan
+                if ("admin-kejahatan".equals(currentRole)) {
+                    spinnerKategori.setVisibility(View.GONE);
+                    tvLabelKategori.setVisibility(View.GONE);
+                }
+
+                loadKategori();
+
+                Query query = firebaseHelper.getDb().collection("pengaduan")
+                        .orderBy("createdAt", Query.Direction.DESCENDING);
+
+                if ("admin-umum".equals(currentRole)) {
+                    query = query.whereEqualTo("jenisPengaduan", "umum");
+                } else if ("admin-kejahatan".equals(currentRole)) {
+                    query = query.whereEqualTo("jenisPengaduan", "kejahatan");
+                }
+
+                query.get().addOnCompleteListener(pengaduanTask -> {
                     showLoading(false);
 
-                    if (task.isSuccessful()) {
+                    if (pengaduanTask.isSuccessful()) {
                         pengaduanList.clear();
 
-                        for (QueryDocumentSnapshot document : task.getResult()) {
+                        for (QueryDocumentSnapshot document : pengaduanTask.getResult()) {
                             Pengaduan pengaduan = document.toObject(Pengaduan.class);
                             pengaduan.setId(document.getId());
                             pengaduanList.add(pengaduan);
                         }
 
                         filterPengaduan();
-
                     } else {
-                        Toast.makeText(this, "Error loading data: " + task.getException().getMessage(),
+                        Toast.makeText(this, "Error loading data: " + pengaduanTask.getException().getMessage(),
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
+
+            } else {
+                showLoading(false);
+                Toast.makeText(this, "Gagal mengambil data admin", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private void filterPengaduan() {
@@ -237,20 +259,15 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
     }
 
     private boolean matchKategori(String kategoriName, String selectedKategori) {
-        if (kategoriName == null) {
-            return false;
-        }
+        if (kategoriName == null) return false;
         return kategoriName.equals(selectedKategori);
     }
 
     private boolean matchTindakan(boolean actionTaken, String selectedTindakan) {
         switch (selectedTindakan) {
-            case "Sudah Ditindak":
-                return actionTaken;
-            case "Belum Ditindak":
-                return !actionTaken;
-            default:
-                return true;
+            case "Sudah Ditindak": return actionTaken;
+            case "Belum Ditindak": return !actionTaken;
+            default: return true;
         }
     }
 
@@ -278,7 +295,6 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Refresh data when returning from detail activity
         loadRiwayatPengaduan();
     }
 }
