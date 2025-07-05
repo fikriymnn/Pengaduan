@@ -9,7 +9,6 @@ public class Admin {
     private String role; // "admin-kejahatan" atau "admin-umum"
     private String phoneNumber;
     private Date createdAt;
-    private Date updatedAt;
 
     public Admin() {} // Required for Firestore
 
@@ -39,7 +38,4 @@ public class Admin {
 
     public Date getCreatedAt() { return createdAt; }
     public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
-
-    public Date getUpdatedAt() { return updatedAt; }
-    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
 }

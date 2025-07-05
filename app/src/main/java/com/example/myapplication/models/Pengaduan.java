@@ -22,8 +22,6 @@ public class Pengaduan implements Serializable {
     private boolean isActionTaken; // apakah sudah ditindak atau belum
     private Date createdAt;
     private Date updatedAt;
-    private String adminId; // ID admin yang melakukan konfirmasi/penolakan
-    private String imageUrl; // URL gambar jika ada
 
     public Pengaduan() {
         // Default constructor required for Firestore
@@ -112,14 +110,6 @@ public class Pengaduan implements Serializable {
         return updatedAt;
     }
 
-    public String getAdminId() {
-        return adminId;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
     // Setters
     public void setId(String id) {
         this.id = id;
@@ -183,13 +173,6 @@ public class Pengaduan implements Serializable {
         this.updatedAt = updatedAt;
     }
 
-    public void setAdminId(String adminId) {
-        this.adminId = adminId;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
 
     // Helper methods
     public boolean isPending() {

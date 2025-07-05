@@ -48,7 +48,7 @@ public class TambahAdminActivity extends AppCompatActivity {
     private void setupSpinner() {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_dropdown_item,
-                new String[]{"admin-kejahatan", "admin-umum"});
+                new String[]{"admin-kejahatan", "admin-umum", "admin-dumas"});
         spinnerRole.setAdapter(adapter);
     }
 

@@ -88,6 +88,8 @@ public class TindakanPengaduanActivity extends AppCompatActivity {
                     query = query.whereEqualTo("jenisPengaduan", "umum");
                 } else if ("admin-kejahatan".equals(role)) {
                     query = query.whereEqualTo("jenisPengaduan", "kejahatan");
+                } else if ("admin-dumas".equals(role)) {
+                    query = query.whereEqualTo("jenisPengaduan", "dumas");
                 }
 
                 query.get().addOnCompleteListener(pengaduanTask -> {

@@ -1,3 +1,4 @@
+// Final version of TindakanDialogFragment.java without redundant docRef variable
 package com.example.myapplication.fragments;
 
 import android.app.DatePickerDialog;
@@ -93,33 +94,22 @@ public class TindakanDialogFragment extends DialogFragment {
     }
 
     private void populateData() {
-        // Set default date to current date and time
         tvTanggalTindakan.setText(dateFormat.format(selectedDate.getTime()));
-
-        // You can set default values if needed
-        // etNamaPetugas.setText(""); // Leave empty for user to fill
     }
 
     private void showDateTimePicker() {
-        Calendar calendar = Calendar.getInstance();
-
-        // Date picker
         DatePickerDialog datePickerDialog = new DatePickerDialog(
                 requireContext(),
                 (view, year, month, dayOfMonth) -> {
                     selectedDate.set(Calendar.YEAR, year);
                     selectedDate.set(Calendar.MONTH, month);
                     selectedDate.set(Calendar.DAY_OF_MONTH, dayOfMonth);
-
-                    // After date is selected, show time picker
                     showTimePicker();
                 },
                 selectedDate.get(Calendar.YEAR),
                 selectedDate.get(Calendar.MONTH),
                 selectedDate.get(Calendar.DAY_OF_MONTH)
         );
-
-        // Set max date to today
         datePickerDialog.getDatePicker().setMaxDate(System.currentTimeMillis());
         datePickerDialog.show();
     }
@@ -143,24 +133,20 @@ public class TindakanDialogFragment extends DialogFragment {
         String namaPetugas = etNamaPetugas.getText().toString().trim();
         String deskripsiTindakan = etDeskripsiTindakan.getText().toString().trim();
 
-        // Validation
         if (TextUtils.isEmpty(namaPetugas)) {
             etNamaPetugas.setError("Nama petugas harus diisi");
             etNamaPetugas.requestFocus();
             return;
         }
-
         if (TextUtils.isEmpty(deskripsiTindakan)) {
             etDeskripsiTindakan.setError("Deskripsi tindakan harus diisi");
             etDeskripsiTindakan.requestFocus();
             return;
         }
 
-        // Disable button to prevent double submission
         btnSimpan.setEnabled(false);
         btnSimpan.setText("Menyimpan...");
 
-        // Create Tindakan object
         String adminId = firebaseHelper.getAuth().getCurrentUser() != null ?
                 firebaseHelper.getAuth().getCurrentUser().getUid() : "";
 
@@ -172,29 +158,21 @@ public class TindakanDialogFragment extends DialogFragment {
                 adminId
         );
 
-        // Save to Firestore
         firebaseHelper.createTindakan(tindakan, task -> {
             if (task.isSuccessful()) {
-                String documentId = task.getResult().getId();
-                tindakan.setId(documentId);
-                // Update pengaduan as actioned
                 firebaseHelper.markPengaduanAsActioned(pengaduan.getId(), updateTask -> {
                     if (updateTask.isSuccessful()) {
-                        if (listener != null) {
-                            listener.onTindakanCreated();
-                        }
+                        if (listener != null) listener.onTindakanCreated();
                         dismiss();
                     } else {
-                        if (listener != null) {
+                        if (listener != null)
                             listener.onError("Gagal memperbarui status pengaduan");
-                        }
                         resetButton();
                     }
                 });
             } else {
-                if (listener != null) {
+                if (listener != null)
                     listener.onError("Gagal menyimpan tindakan: " + task.getException().getMessage());
-                }
                 resetButton();
             }
         });

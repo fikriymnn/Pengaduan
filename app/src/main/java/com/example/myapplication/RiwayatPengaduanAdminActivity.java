@@ -150,6 +150,8 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
         if ("admin-kejahatan".equals(currentRole)) {
             // Tidak perlu load kategori
             return;
+        } else if ("admin-dumas".equals(currentRole)) {
+            return;
         }
 
         firebaseHelper.getDb().collection("kategori")
@@ -180,8 +182,8 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
                 Admin admin = task.getResult().toObject(Admin.class);
                 currentRole = admin.getRole();
 
-                // Sembunyikan kategori jika admin-kejahatan
-                if ("admin-kejahatan".equals(currentRole)) {
+                // Sembunyikan kategori jika admin-kejahatan atau admin-dumas
+                if ("admin-kejahatan".equals(currentRole) || "admin-dumas".equals(currentRole)) {
                     spinnerKategori.setVisibility(View.GONE);
                     tvLabelKategori.setVisibility(View.GONE);
                 }
@@ -195,6 +197,8 @@ public class RiwayatPengaduanAdminActivity extends AppCompatActivity {
                     query = query.whereEqualTo("jenisPengaduan", "umum");
                 } else if ("admin-kejahatan".equals(currentRole)) {
                     query = query.whereEqualTo("jenisPengaduan", "kejahatan");
+                } else if ("admin-dumas".equals(currentRole)) {
+                    query = query.whereEqualTo("jenisPengaduan", "dumas");
                 }
 
                 query.get().addOnCompleteListener(pengaduanTask -> {

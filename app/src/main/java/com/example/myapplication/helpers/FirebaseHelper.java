@@ -56,10 +56,10 @@ public class FirebaseHelper {
     }
 
     // Pengaduan operations
-    public void createPengaduan(Pengaduan pengaduan, OnCompleteListener<DocumentReference> listener) {
-        db.collection("pengaduan")
-                .add(pengaduan)
-                .addOnCompleteListener(listener);
+    public void createPengaduan(Pengaduan pengaduan, OnCompleteListener<Void> listener) {
+        DocumentReference docRef = getDb().collection("pengaduan").document(); // Buat dokumen baru dengan ID otomatis
+        pengaduan.setId(docRef.getId()); // Set ID ke dalam objek
+        docRef.set(pengaduan).addOnCompleteListener(listener);
     }
 
     public void getUserPengaduan(String userId, OnCompleteListener<QuerySnapshot> listener) {
@@ -186,11 +186,12 @@ public class FirebaseHelper {
     }
 
     // Tindakan operations
-    public void createTindakan(Tindakan tindakan, OnCompleteListener<DocumentReference> listener) {
-        db.collection("tindakan")
-                .add(tindakan)
-                .addOnCompleteListener(listener);
+    public void createTindakan(Tindakan tindakan, OnCompleteListener<Void> listener) {
+        DocumentReference docRef = getDb().collection("tindakan").document(); // Buat dokumen baru dengan ID otomatis
+        tindakan.setId(docRef.getId()); // Set ID ke dalam objek
+        docRef.set(tindakan).addOnCompleteListener(listener);
     }
+
 
     public void getTindakanByPengaduanId(String pengaduanId, OnCompleteListener<QuerySnapshot> listener) {
         db.collection("tindakan")
@@ -233,11 +234,12 @@ public class FirebaseHelper {
                 .addOnCompleteListener(listener);
     }
 
-    public void createKategori(Kategori kategori, OnCompleteListener<DocumentReference> listener) {
-        db.collection("kategori")
-                .add(kategori)
-                .addOnCompleteListener(listener);
+    public void createKategori(Kategori kategori, OnCompleteListener<Void> listener) {
+        DocumentReference docRef = getDb().collection("kategori").document(); // Buat dokumen baru dengan ID otomatis
+        kategori.setId(docRef.getId()); // Set ID ke dalam objek
+        docRef.set(kategori).addOnCompleteListener(listener);
     }
+
 
     public void updateKategori(String id, Kategori kategori, OnCompleteListener<Void> listener) {
         db.collection("kategori")

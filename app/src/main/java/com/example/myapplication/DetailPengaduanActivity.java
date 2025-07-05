@@ -260,13 +260,7 @@ public class DetailPengaduanActivity extends AppCompatActivity {
         // Display action data
         displayActionData();
 
-        // Display image if available
-        if (pengaduan.getImageUrl() != null && !pengaduan.getImageUrl().isEmpty()) {
-            layoutFotoPengaduan.setVisibility(View.VISIBLE);
-            Glide.with(this).load(pengaduan.getImageUrl()).into(ivFotoPengaduan);
-        } else {
-            layoutFotoPengaduan.setVisibility(View.GONE);
-        }
+
 
         // Show admin actions if needed
         showAdminActions();

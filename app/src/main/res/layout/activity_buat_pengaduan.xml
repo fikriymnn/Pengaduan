@@ -94,6 +94,12 @@
                         android:text="Keluhan Umum (Kebisingan, Parkir Liar, dll)"
                         android:textSize="14sp" />
 
+                    <RadioButton
+                        android:id="@+id/rb_dumas"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Dumas (Pelanggaran Anggota Polri)"/>
+
                 </RadioGroup>
 
                 <!-- Kategori (Only for Umum) -->
